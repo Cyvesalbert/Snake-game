@@ -40,3 +40,56 @@ medium = textFont.render('Medium', True, white)
 dificult = textFont.render('Dificult', True, white)
 titre2 = textFont.render('Choose a level below', True, white)
 back = textFont.render('back',True, white)
+
+
+class menu():
+    def __init__(self):
+        self.playScreenObject = playScreen()
+        self.displayScoreObject = displayScore()
+        self.levelObject = level()
+
+    def runMenu(self):
+        while True:
+            screen.blit(bg, (0, 0))
+            for ev in pygame.event.get():
+                if ev.type == pygame.QUIT:
+                    pygame.quit()
+
+                if ev.type == pygame.MOUSEBUTTONDOWN:
+                    if width / 2.4 <= mouse[0] <= width / 2.4 + 140 and height / 2.3 <= mouse[1] <= height / 2.3 + 40:
+                        self.playScreenObject.main()
+                    if width / 2.1 <= mouse[0] <= width / 2.1 + 140 and height / 1.8 <= mouse[1] <= height / 1.8 + 40:
+                        self.levelObject.runLevel()
+                    if width / 2.3 <= mouse[0] <= width / 2.3 + 140 and height / 1.5 <= mouse[1] <= height / 1.5 + 40:
+                        self.displayScoreObject.afficherScore()
+
+            # screen.fill(black) # fills the screen with a color
+            mouse = pygame.mouse.get_pos() # store le coordinates as a tuple
+
+            # if mouse is hovered on Start button it changes to lighter shade
+            if width / 2.4 <= mouse[0] <= width / 2.4 + 140 and height / 2.3 <= mouse[1] <= height / 2.3 + 40:
+                pygame.draw.rect(screen, colorLight, [width / 2.4, height / 2.3, 140, 40])
+            else:
+                pygame.draw.rect(screen, colorDark, [width / 2.4, height / 2.3, 140, 40])
+
+            # if mouse is hovered on Level button it changes to lighter shade
+            if width / 2.1 <= mouse[0] <= width / 2.1 + 140 and height / 1.8 <= mouse[1] <= height / 1.8 + 40:
+                pygame.draw.rect(screen, colorLight, [width / 2.4, height / 1.8, 140, 40])
+            else:
+                pygame.draw.rect(screen, colorDark, [width / 2.4, height / 1.8, 140, 40])
+
+            # if mouse is hovered on BestScore button it changes to lighter shade
+            if width / 2.3 <= mouse[0] <= width / 2.3 + 140 and height / 1.5 <= mouse[1] <= height / 1.5 + 40:
+                pygame.draw.rect(screen, colorLight, [width / 2.4, height / 1.5, 140, 40])
+            else:
+                pygame.draw.rect(screen, colorDark, [width / 2.4, height / 1.5, 140, 40])
+
+            # superimposing the text onto our button
+            screen.blit(titre1, (width / 7, height / 4))
+            screen.blit(play, (width / 2.1, height / 2.3))
+            screen.blit(gameLevel, (width / 2.1, height / 1.8))
+            screen.blit(bestScore, (width / 2.4, height / 1.5))
+            
+            # updates the frames of the game
+            pygame.display.update()
+
