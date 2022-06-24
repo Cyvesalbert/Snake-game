@@ -1,48 +1,56 @@
-import pygame
+import time
 import random
+import pygame
+
 
 
 pygame.init() # initializing the constructor
-width = 600
+width = 800
 height = 600
 pygame.display.set_caption('Snake 1.0')
 screen = pygame.display.set_mode((width, height)) # opens up a window
-fps = pygame.time.Clock() # FPS (frames per second) controller
+fps = pygame.time.Clock() # FPS (frames per second) controller to change the speed of the game
 
 bg = pygame.image.load("snakeMenu.png")
 bg1 = pygame.image.load("playgroundbackground.jpg")
+bg2 = pygame.image.load("center.png")
 
 bg = pygame.transform.scale(bg, (width, height))
 bg1 = pygame.transform.scale(bg1, (width, height))
+bg2 = pygame.transform.scale(bg2, (width, height))
 
 colorLight = (170, 170, 170) # light shade of the button
-colorDark = (100, 100, 100) # dark shade of the button
-black = pygame.Color(0, 0, 0)
-white = pygame.Color(255, 255, 255)
+colorDark = (40, 75, 130) # dark shade of the button
+black = pygame.Color(15, 10, 5)
+white = pygame.Color(195, 240, 240)
 red = pygame.Color(255, 0, 0)
 green = pygame.Color(0, 255, 0)
 blue = pygame.Color(0, 0, 255)
+x_color = pygame.Color(165, 23, 15)
 
-titleFont= pygame.font.SysFont('Helvetica', 50)
-textFont = pygame.font.SysFont('Roboto',40)
+titleFont= pygame.font.SysFont('Calibri', 77)
+textFont = pygame.font.SysFont('Calibri',35)
 
 play = textFont.render('Play', True, white)
 gameLevel = textFont.render('Level', True, white)
 bestScore = textFont.render('Best score', True, white)
-titre1 = titleFont.render('Welcome to snake game!', True, white)
+titre1 = titleFont.render('Welcome to snake game', True, white)
 quit = textFont.render('Quit', True, white)
 replay = textFont.render('Replay', True, white)
 easy = textFont.render('Easy', True, white)
 medium = textFont.render('Medium', True, white)
-dificult = textFont.render('Dificult', True, white)
-titre2 = textFont.render('Choose a level below', True, white)
-back = textFont.render('back',True, white)
+dificult = textFont.render('Difficult', True, white)
+titre2 = titleFont.render('Choose a level below', True, white)
+back = textFont.render('Back',True, black)
+help = textFont.render('Help', True, white)
+
 
 class menu():
     def __init__(self):
         self.playScreenObject = playScreen()
-        # self.displayScoreObject = displayScore()
-        # self.levelObject = level()
+        self.displayScoreObject = BestScore()
+        self.levelObject = Level()
+        self.helpObject = Help()
 
     def runMenu(self):
         while True:
@@ -55,11 +63,11 @@ class menu():
                     if width / 2.4 <= mouse[0] <= width / 2.4 + 140 and height / 2.3 <= mouse[1] <= height / 2.3 + 40:
                         self.playScreenObject.main()
                     if width / 2.1 <= mouse[0] <= width / 2.1 + 140 and height / 1.8 <= mouse[1] <= height / 1.8 + 40:
-                        # self.levelObject.runLevel()
-                        pass
+                        self.levelObject.displayLevel()
                     if width / 2.3 <= mouse[0] <= width / 2.3 + 140 and height / 1.5 <= mouse[1] <= height / 1.5 + 40:
-                        # self.displayScoreObject.afficherScore()
-                        pass
+                        self.displayScoreObject.displayBestScore()
+                    if width / 2.1 <= mouse[0] <= width / 2.1 + 140 and height / 1.3 <= mouse[1] <= height / 1.3 + 40:
+                        self.helpObject.displayHelp()
 
             # screen.fill(black) # fills the screen with a color
             mouse = pygame.mouse.get_pos() # store le coordinates as a tuple
@@ -78,15 +86,22 @@ class menu():
 
             # if mouse is hovered on BestScore button it changes to lighter shade
             if width / 2.3 <= mouse[0] <= width / 2.3 + 140 and height / 1.5 <= mouse[1] <= height / 1.5 + 40:
-                pygame.draw.rect(screen, colorLight, [width / 2.4, height / 1.5, 140, 40])
+                pygame.draw.rect(screen, colorLight, [width / 2.4, height / 1.5, 150, 40])
             else:
-                pygame.draw.rect(screen, colorDark, [width / 2.4, height / 1.5, 140, 40])
+                pygame.draw.rect(screen, colorDark, [width / 2.4, height / 1.5, 150, 40])
+
+            # if mouse is hovered on BestScore button it changes to lighter shade
+            if width / 2.2 <= mouse[0] <= width / 2.2 + 140 and height / 1.3 <= mouse[1] <= height / 1.3 + 40:
+                pygame.draw.rect(screen, colorLight, [width / 2.4, height / 1.3, 140, 40])
+            else:
+                pygame.draw.rect(screen, colorDark, [width / 2.4, height / 1.3, 140, 40])
 
             # superimposing the text onto our button
-            screen.blit(titre1, (width / 7, height / 4))
+            screen.blit(titre1, (width / 21, height / 4))
             screen.blit(play, (width / 2.1, height / 2.3))
-            screen.blit(gameLevel, (width / 2.1, height / 1.8))
+            screen.blit(gameLevel, (width / 2.2, height / 1.8))
             screen.blit(bestScore, (width / 2.4, height / 1.5))
+            screen.blit(help, (width / 2.15, height / 1.3))
 
             pygame.display.update() # updates the frames of the game
 
@@ -106,7 +121,7 @@ class playScreen:
     # method to run the game
     def main(self):
         while True:
-            screen.blit(bg1, (0, 0))
+            screen.fill(white)
             # handling key events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -132,8 +147,7 @@ class playScreen:
 
             # if mouse is hovered on back button it changes to lighter shade
             if width / 1.12 <= mouse1[0] <= width / 1.12 + 140 and height / 150 <= mouse1[1] <= height / 150 + 40:
-                pygame.draw.rect(screen, colorLight, [width / 1.12, height / 150, 120, 30])
-
+                pygame.draw.rect(screen, colorLight, [width / 1.12, height / 150, 120, 40])
 
             # If two keys pressed simultaneously we don't want snake to move into two directions simultaneously
             if self.changeTo == 'UP' and self.direction != 'DOWN':
@@ -167,12 +181,12 @@ class playScreen:
                 self.fruitPosition = [random.randrange(1, (width// 10)) * 10, random.randrange(1, (height // 10)) * 10]
 
             self.fruitSpawn = True
-            #screen.fill(black)
+
 
             for pos in self.snakeBody:
-                pygame.draw.rect(screen, blue, pygame.Rect(pos[0], pos[1], 10, 10))
+                pygame.draw.rect(screen, red, pygame.Rect(pos[0], pos[1], 10, 10))
 
-            pygame.draw.rect(screen, white, pygame.Rect(self.fruitPosition[0], self.fruitPosition[1], 10, 10))
+            pygame.draw.rect(screen, x_color, pygame.Rect(self.fruitPosition[0], self.fruitPosition[1], 10, 10))
 
             # Game Over conditions
             if self.snakePosition[0] < 0 or self.snakePosition[0] > width - 10:
@@ -195,7 +209,7 @@ class playScreen:
 
     # displaying Score function
     def show_score(self):
-        scoreSurface = textFont.render('Score : ' + str(self.score), True, white) # create the display surface object score_surface
+        scoreSurface = textFont.render('SCORE : ' + str(self.score), True, black) # create the display surface object score_surface
         scoreRect = scoreSurface.get_rect() # create a rectangular object for the text surface object
         screen.blit(scoreSurface, scoreRect) # displaying text
 
@@ -205,9 +219,9 @@ class playScreen:
             sco.write(" " + str(self.score))
 
         #creating a text surface on which text will be drawn
-        gameOverSurface = textFont.render('Game Over! Your Score is : ' + str(self.score), True, red)
+        gameOverSurface = textFont.render('Game Over! Your Score is : ' + str(self.score), True, black)
         inputFile = open('scores.txt', 'r')
-        bestScoreSurface = textFont.render("The Best Score is : " + str(max([int(num) for num in inputFile.read().split()])), True, red)
+        bestScoreSurface = titleFont.render("The Best Score is : " + str(max([int(num) for num in inputFile.read().split()])), True, black)
 
         gameOverRect = gameOverSurface.get_rect() # create a rectangular object for the text surface object
         bestScoreRectangle = bestScoreSurface.get_rect() # create a rectangular object for the text surface object
@@ -216,7 +230,7 @@ class playScreen:
         bestScoreRectangle.midtop = (width / 2, height / 3) # setting position of the text
 
         while True:
-            screen.blit(bg, (0, 0))
+            screen.fill(x_color)
             for ev in pygame.event.get():
                 if ev.type == pygame.QUIT:
                     pygame.quit()
@@ -246,7 +260,119 @@ class playScreen:
             # superimposing the text onto our button
             screen.blit(bestScoreSurface, bestScoreRectangle)
             screen.blit(gameOverSurface, gameOverRect)
-            screen.blit(replay, (width / 2.2, height / 1.8))
-            screen.blit(quit, (width / 2.1, height / 1.5))
+            screen.blit(replay, (width / 2.22, height / 1.8))
+            screen.blit(quit, (width / 2.15, height / 1.5))
 
             pygame.display.update() # updates the frames of the game
+
+
+class Level:
+    def __init__(self):
+        self.plaScreenObject = playScreen()
+
+    def displayLevel(self):
+        while True:
+            screen.fill(black)
+            for ev in pygame.event.get():
+                if ev.type == pygame.QUIT:
+                    pygame.quit()
+
+                if ev.type == pygame.MOUSEBUTTONDOWN:
+                    if width / 2.4 <= mouse[0] <= width / 2.4 + 140 and height / 2.3 <= mouse[1] <= height / 2.3 + 40:
+                        playScreen.snakeSpeed = 15
+                        self.plaScreenObject.main()
+                    if width / 2.1 <= mouse[0] <= width / 2.1 + 140 and height / 1.8 <= mouse[1] <= height / 1.8 + 40:
+                        playScreen.snakeSpeed = 25
+                        self.plaScreenObject.main()
+                    if width / 2.3 <= mouse[0] <= width / 2.3 + 140 and height / 1.5 <= mouse[1] <= height / 1.5 + 40:
+                        playScreen.snakeSpeed = 35
+                        self.plaScreenObject.main()
+
+            # screen.fill(black) # fills the screen with a color
+            mouse = pygame.mouse.get_pos() # store le coordinates as a tuple
+
+            # if mouse is hovered on Start button it changes to lighter shade
+            if width / 2.4 <= mouse[0] <= width / 2.4 + 140 and height / 2.3 <= mouse[1] <= height / 2.3 + 40:
+                pygame.draw.rect(screen, colorLight, [width / 2.4, height / 2.3, 140, 40])
+            else:
+                pygame.draw.rect(screen, colorDark, [width / 2.4, height / 2.3, 140, 40])
+
+            # if mouse is hovered on Level button it changes to lighter shade
+            if width / 2.1 <= mouse[0] <= width / 2.1 + 140 and height / 1.8 <= mouse[1] <= height / 1.8 + 40:
+                pygame.draw.rect(screen, colorLight, [width / 2.4, height / 1.8, 140, 40])
+            else:
+                pygame.draw.rect(screen, colorDark, [width / 2.4, height / 1.8, 140, 40])
+
+            # if mouse is hovered on BestScore button it changes to lighter shade
+            if width / 2.3 <= mouse[0] <= width / 2.3 + 140 and height / 1.5 <= mouse[1] <= height / 1.5 + 40:
+                pygame.draw.rect(screen, colorLight, [width / 2.4, height / 1.5, 140, 40])
+            else:
+                pygame.draw.rect(screen, colorDark, [width / 2.4, height / 1.5, 140, 40])
+
+            # superimposing the text onto our button
+            screen.blit(titre2, (width / 11, height / 4))
+            screen.blit(easy, (width / 2.13, height / 2.3))
+            screen.blit(medium, (width / 2.3, height / 1.8))
+            screen.blit(dificult, (width / 2.32, height / 1.5))
+
+
+            pygame.display.update() # updates the frames of the game
+
+
+class BestScore:
+    def __init__(self):
+        pass
+
+    def displayBestScore(self):
+        while True:
+            screen.fill(black)
+            for ev in pygame.event.get():
+                if ev.type == pygame.QUIT:
+                    pygame.quit()
+
+            inputFile = open('scores.txt', 'r') # open the file to retrieve scores
+            bestScoreSurface = titleFont.render("The Best Score is : " + str(max([int(num) for num in inputFile.read().split()])), True, white)
+            bestScoreRectangle = bestScoreSurface.get_rect()  # create a rectangular object for the text surface object
+            bestScoreRectangle.midtop = (width / 2, height / 3)  # setting position of the text
+            screen.blit(bestScoreSurface, bestScoreRectangle)
+
+            pygame.display.update()
+
+            time.sleep(2)
+
+            a = menu()
+            a.runMenu()
+
+
+class Help:
+    def __init__(self):
+        pass
+
+    def displayHelp(self):
+        while True:
+            screen.fill(white) # fills the screen with a color
+            screen.blit(bg2, (0, 0))
+
+            for ev in pygame.event.get():
+                if ev.type == pygame.QUIT:
+                    pygame.quit()
+
+                # if mouse is clicked on back button the main menu appear
+                if ev.type == pygame.MOUSEBUTTONDOWN:
+                    if width / 1.12 <= mouse1[0] <= width / 1.12 + 140 and height / 150 <= mouse1[1] <= height / 150 + 40:
+                        backToMenu = menu()
+                        backToMenu.runMenu()
+
+            mouse1 = pygame.mouse.get_pos()  # store le coordinates as a tuple
+
+            # if mouse is hovered on back button it changes to lighter shade
+            if width / 1.12 <= mouse1[0] <= width / 1.12 + 140 and height / 150 <= mouse1[1] <= height / 150 + 40:
+                pygame.draw.rect(screen, colorLight, [width / 1.12, height / 150, 120, 40])
+
+            screen.blit(back, (width / 1.12, height / 150))
+            pygame.display.update()
+
+
+
+test = menu()
+test.runMenu()
